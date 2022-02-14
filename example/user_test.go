@@ -138,44 +138,6 @@ func TestUserLoader(t *testing.T) {
 		require.Len(t, fetches[2], 3) // E1 U9 E2 in some random order
 	})
 
-	t.Run("primed reads dont hit the fetcher", func(t *testing.T) {
-		dl.Prime("U99", &User{ID: "U99", Name: "Primed user"})
-		u, err := dl.Load("U99")
-		require.NoError(t, err)
-		require.Equal(t, "Primed user", u.Name)
-
-		require.Len(t, fetches, 3)
-	})
-
-	t.Run("priming in a loop is safe", func(t *testing.T) {
-		users := []User{
-			{ID: "Alpha", Name: "Alpha"},
-			{ID: "Omega", Name: "Omega"},
-		}
-		for _, user := range users {
-			dl.Prime(user.ID, &user)
-		}
-
-		u, err := dl.Load("Alpha")
-		require.NoError(t, err)
-		require.Equal(t, "Alpha", u.Name)
-
-		u, err = dl.Load("Omega")
-		require.NoError(t, err)
-		require.Equal(t, "Omega", u.Name)
-
-		require.Len(t, fetches, 3)
-	})
-
-	t.Run("cleared results will go back to the fetcher", func(t *testing.T) {
-		dl.Clear("U99")
-		u, err := dl.Load("U99")
-		require.NoError(t, err)
-		require.Equal(t, "user U99", u.Name)
-
-		require.Len(t, fetches, 4)
-	})
-
 	t.Run("load all thunk", func(t *testing.T) {
 		thunk1 := dl.LoadAllThunk([]string{"U5", "U6"})
 		thunk2 := dl.LoadAllThunk([]string{"U6", "E6"})
