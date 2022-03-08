@@ -1,6 +1,7 @@
 package example
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -18,7 +19,7 @@ func TestUserLoader(t *testing.T) {
 	dl := &UserLoader{
 		wait:     10 * time.Millisecond,
 		maxBatch: 5,
-		fetch: func(keys []string) ([]*User, []error) {
+		fetch: func(ctx context.Context, keys []string) ([]*User, []error) {
 			mu.Lock()
 			fetches = append(fetches, keys)
 			mu.Unlock()
@@ -36,25 +37,26 @@ func TestUserLoader(t *testing.T) {
 			return users, errors
 		},
 	}
+	ctx := context.Background()
 
 	t.Run("fetch concurrent data", func(t *testing.T) {
 		t.Run("load user successfully", func(t *testing.T) {
 			t.Parallel()
-			u, err := dl.Load("U1")
+			u, err := dl.Load(ctx, "U1")
 			require.NoError(t, err)
 			require.Equal(t, u.ID, "U1")
 		})
 
 		t.Run("load failed user", func(t *testing.T) {
 			t.Parallel()
-			u, err := dl.Load("E1")
+			u, err := dl.Load(ctx, "E1")
 			require.Error(t, err)
 			require.Nil(t, u)
 		})
 
 		t.Run("load many users", func(t *testing.T) {
 			t.Parallel()
-			u, err := dl.LoadAll([]string{"U2", "E2", "E3", "U4"})
+			u, err := dl.LoadAll(ctx, []string{"U2", "E2", "E3", "U4"})
 			require.Equal(t, u[0].Name, "user U2")
 			require.Equal(t, u[3].Name, "user U4")
 			require.Error(t, err[1])
@@ -63,8 +65,8 @@ func TestUserLoader(t *testing.T) {
 
 		t.Run("load thunk", func(t *testing.T) {
 			t.Parallel()
-			thunk1 := dl.LoadThunk("U5")
-			thunk2 := dl.LoadThunk("E5")
+			thunk1 := dl.LoadThunk(ctx, "U5")
+			thunk2 := dl.LoadThunk(ctx, "E5")
 
 			u1, err1 := thunk1()
 			require.NoError(t, err1)
@@ -89,14 +91,14 @@ func TestUserLoader(t *testing.T) {
 
 		t.Run("previously cached", func(t *testing.T) {
 			t.Parallel()
-			u, err := dl.Load("U1")
+			u, err := dl.Load(ctx, "U1")
 			require.NoError(t, err)
 			require.Equal(t, u.ID, "U1")
 		})
 
 		t.Run("load many users", func(t *testing.T) {
 			t.Parallel()
-			u, err := dl.LoadAll([]string{"U2", "U4"})
+			u, err := dl.LoadAll(ctx, []string{"U2", "U4"})
 			require.NoError(t, err[0])
 			require.NoError(t, err[1])
 			require.Equal(t, u[0].Name, "user U2")
@@ -114,14 +116,14 @@ func TestUserLoader(t *testing.T) {
 	t.Run("fetch partial", func(t *testing.T) {
 		t.Run("errors not in cache cache value", func(t *testing.T) {
 			t.Parallel()
-			u, err := dl.Load("E2")
+			u, err := dl.Load(ctx, "E2")
 			require.Nil(t, u)
 			require.Error(t, err)
 		})
 
 		t.Run("load all", func(t *testing.T) {
 			t.Parallel()
-			u, err := dl.LoadAll([]string{"U1", "U4", "E1", "U9", "U5"})
+			u, err := dl.LoadAll(ctx, []string{"U1", "U4", "E1", "U9", "U5"})
 			require.Equal(t, u[0].ID, "U1")
 			require.Equal(t, u[1].ID, "U4")
 			require.Error(t, err[2])
@@ -139,8 +141,9 @@ func TestUserLoader(t *testing.T) {
 	})
 
 	t.Run("load all thunk", func(t *testing.T) {
-		thunk1 := dl.LoadAllThunk([]string{"U5", "U6"})
-		thunk2 := dl.LoadAllThunk([]string{"U6", "E6"})
+		ctx := context.Background()
+		thunk1 := dl.LoadAllThunk(ctx, []string{"U5", "U6"})
+		thunk2 := dl.LoadAllThunk(ctx, []string{"U6", "E6"})
 
 		users1, err1 := thunk1()
 
