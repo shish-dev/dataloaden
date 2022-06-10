@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shiqiyue/dataloaden/pkg/generator"
+	"github.com/shish-dev/dataloaden/pkg/generator"
 )
 
 func main() {

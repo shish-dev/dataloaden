@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shiqiyue/dataloaden/example"
+	"github.com/shish-dev/dataloaden/example"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

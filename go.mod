@@ -1,4 +1,4 @@
-module github.com/shiqiyue/dataloaden
+module github.com/shish-dev/dataloaden
 
 go 1.17
 

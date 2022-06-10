@@ -1,4 +1,4 @@
-//go:generate go run github.com/shiqiyue/dataloaden UserSliceLoader int []github.com/shiqiyue/dataloaden/example.User
+//go:generate go run github.com/shish-dev/dataloaden UserSliceLoader int []github.com/shish-dev/dataloaden/example.User
 
 package slice
 
@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/shiqiyue/dataloaden/example"
+	"github.com/shish-dev/dataloaden/example"
 )
 
 func NewLoader() *UserSliceLoader {
