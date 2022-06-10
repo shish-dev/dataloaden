@@ -9,6 +9,8 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/iancoleman/strcase"
+
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/imports"
@@ -84,7 +86,7 @@ func Generate(name string, keyType string, valueType string, wd string) error {
 		return err
 	}
 
-	filename := strings.ToLower(data.Name) + "_gen.go"
+	filename := strcase.ToSnake(data.Name) + ".go"
 
 	if err := writeTemplate(filepath.Join(wd, filename), data); err != nil {
 		return err
